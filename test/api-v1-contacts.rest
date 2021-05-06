@@ -1,0 +1,61 @@
+@host = localhost
+@port = 8000
+@hostname = http://{{host}}:{{port}}
+@route = /api/v1/contacts
+@paramsId = {{postContact.response.body.data.$._id}}
+@querySelect = select=name,organisation,position
+@querySort = sort=name
+@querylimit = limit=6
+@querypage = page=10
+
+### 
+# @name getAllContacts
+GET {{hostname}}{{route}}
+
+
+### 
+# @name getContactById
+GET {{hostname}}{{route}}/{{paramsId}}
+
+
+###
+# @name postContact
+POST {{hostname}}{{route}}
+Content-Type: application/json
+
+{
+   "salutation": "Mdm",
+  "name": {
+    "firstName": "Galven",
+    "lastName": "Bellsham",
+    "alias": "碧萱"
+  },
+  "organisation": "Johnson, O'Reilly and DuBuque",
+  "position": "Fusce posuere felis sed lacus.",
+  "address": "1 HarbourFront Walk Singapore",
+  "contact": {
+    "telephone": "+7-812-937-8305",
+    "mobile": "6559256698",
+    "email": "gbellsham0@hud.gov"
+  },
+  "notes": "Donec odio justo, sollicitudin ut, suscipit a, feugiat et, eros."
+}
+
+
+
+###
+PUT {{hostname}}{{route}}/{{paramsId}}
+Content-Type: application/json
+
+{
+ "name": {
+    "firstName": "Red",
+    "lastName": "Berry"
+  },
+  "salutation": "Ms",
+  "address": "28 Temenggong Road Singapore"
+}
+
+
+###
+DELETE  {{hostname}}{{route}}/{{paramsId}}
