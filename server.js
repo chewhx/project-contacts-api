@@ -32,8 +32,8 @@ app.use(xss());
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10mins
-  max: 15,
+  windowMs: 1 * 60 * 1000, // 1min
+  max: 60,
 });
 app.use(limiter);
 
