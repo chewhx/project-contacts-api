@@ -1,9 +1,12 @@
 import React from "react";
 import { Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
-import Contacts from "./components/Contacts";
 import Navbar from "./components/Navbar";
-import PostContacts from "./components/PostContacts";
+// import GetContacts from "./components/GetContacts";
+// import PostContact from "./components/PostContact";
+// import PutContact from "./components/PutContact";
+// import DeleteContact from "./components/DeleteContact";
+import HomeScreen from "./screens/HomeScreen";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -11,10 +14,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <Navbar />
-      <div className="container">
-        <Route exact path={`/`} component={Contacts} />
-        <Route exact path={`/post`} component={PostContacts} />
-      </div>
+      <Route path={`/`} component={HomeScreen} />
     </QueryClientProvider>
   );
 };

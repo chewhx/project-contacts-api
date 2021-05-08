@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "react-query";
+import { Link } from "react-router-dom";
 
 const fields = [
   "First Name",
@@ -17,7 +18,7 @@ const Contacts = () => {
   const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState("name.firstName");
   const [select, setSelect] = useState([]);
-  console.log(select);
+
   const URL = `https://project-contacts-api.vercel.app/api/v1/contacts?limit=${limit}&page=${page}&sort=${sort}`;
 
   const fetchContacts = async () => {
@@ -26,7 +27,7 @@ const Contacts = () => {
   };
 
   const { status, data, isPreviousData } = useQuery(
-    ["planets", page, limit, sort],
+    ["contacts", page, limit, sort],
     fetchContacts,
     {
       keepPreviousData: true,
@@ -42,28 +43,30 @@ const Contacts = () => {
       <p>
         Page {page} / {data.pages}{" "}
       </p>
-      <table className="table table-bordered table-hover">
-        <thead>
-          <tr>
-            <th scope="col">First Name</th>
-            <th scope="col">Last Name</th>
-            <th scope="col">Alias</th>
-            <th scope="col">Organisation</th>
-            <th scope="col">Position</th>
-            <th scope="col">Telephone</th>
-            <th scope="col">Mobile</th>
-            <th scope="col">Email</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.data.map((contact, idx) => (
-            <ContactRow key={`contact-${idx}`} contact={contact} />
-          ))}
-        </tbody>
-      </table>
+      <div className="table-responsive">
+        <table className="table table-sm table-bordered table-hover">
+          <thead>
+            <tr>
+              <th scope="col">First Name</th>
+              <th scope="col">Last Name</th>
+              <th scope="col">Alias</th>
+              <th scope="col">Organisation</th>
+              <th scope="col">Position</th>
+              <th scope="col">Telephone</th>
+              <th scope="col">Mobile</th>
+              <th scope="col">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.data.map((contact, idx) => (
+              <ContactRow key={`contact-${idx}`} contact={contact} />
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="form-row">
         <form className="form-group mr-4">
-          <label for="perPage" className="form-label">
+          <label htmlFor="perPage" className="form-label">
             Per page
           </label>
           <select
@@ -86,7 +89,7 @@ const Contacts = () => {
           </select>
         </form>
         <form className="form-group mr-4">
-          <label for="sortBy" className="form-label">
+          <label htmlFor="sortBy" className="form-label">
             Sort by:
           </label>
           <select
@@ -152,7 +155,9 @@ const Contacts = () => {
 const ContactRow = ({ contact }) => {
   return (
     <tr>
-      <td>{contact.name.firstName}</td>
+      <td>
+        <Link to={`/put/${contact._id}`}>{contact.name.firstName}</Link>
+      </td>
       <td>{contact.name.lastName}</td>
       <td>{contact.name.alias}</td>
       <td>{contact.organisation}</td>
@@ -175,7 +180,7 @@ const FieldCheckBox = ({ label, onChange }) => {
           value={label.toLowerCase()}
           onChange={onChange}
         />
-        <label className="custom-control-label" for={label.toLowerCase()}>
+        <label className="custom-control-label" htmlFor={label.toLowerCase()}>
           {label}
         </label>
       </div>
