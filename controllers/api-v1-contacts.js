@@ -8,21 +8,45 @@ const asyncHandler = require("../middlewares/async");
 module.exports.get_AllContacts = asyncHandler(async (req, res, next) => {
   let queryString = Contact.find();
 
+  // Handle 'all' query to return all the results without pagination and limit, this will override all pagination and limit queries
+
   // Handle select query ?select=name,telephone
   let selectArray;
-  if (req.query.select) {
+  if (req.query.select && !req.query.all) {
     selectArray = req.query.select.split(",");
     queryString = queryString.select(selectArray);
   }
 
   // Handle pagination
-  const limit = parseInt(req.query.limit) || 10;
-  const page = parseInt(req.query.page) || 1;
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  const total = await Contact.countDocuments();
-  const pages = Math.ceil(total / limit);
-  queryString = queryString.limit(limit).skip(startIndex);
+  let pages = 0;
+  let pagination = {};
+
+  if (!req.query.all) {
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const total = await Contact.countDocuments();
+    pages = Math.ceil(total / limit);
+    queryString = queryString.limit(limit).skip(startIndex);
+
+    // Pagination results
+    pagination = {};
+
+    if (endIndex < total) {
+      pagination.next = {
+        page: page + 1,
+        limit,
+      };
+    }
+
+    if (startIndex > 0) {
+      pagination.prev = {
+        page: page - 1,
+        limit,
+      };
+    }
+  }
 
   // Handle sort query ?sort=-name
   if (req.query.sort) {
@@ -31,22 +55,6 @@ module.exports.get_AllContacts = asyncHandler(async (req, res, next) => {
     queryString = queryString.sort("-updatedAt");
   }
 
-  // Pagination results
-  const pagination = {};
-
-  if (endIndex < total) {
-    pagination.next = {
-      page: page + 1,
-      limit,
-    };
-  }
-
-  if (startIndex > 0) {
-    pagination.prev = {
-      page: page - 1,
-      limit,
-    };
-  }
   const contacts = await queryString;
   res.status(200).json({
     success: true,

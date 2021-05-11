@@ -7,10 +7,10 @@
 @querySort = sort=name
 @querylimit = limit=6
 @querypage = page=10
-
+@queryAll = all=true
 ### 
 # @name getAllContacts
-GET {{hostname}}{{route}}
+GET {{hostname}}{{route}}?{{queryAll}}&{{querylimit}}&{{querypage}}&{{querySort}}
 
 
 ### 
