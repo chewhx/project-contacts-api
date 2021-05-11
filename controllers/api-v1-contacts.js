@@ -12,7 +12,7 @@ module.exports.get_AllContacts = asyncHandler(async (req, res, next) => {
 
   // Handle select query ?select=name,telephone
   let selectArray;
-  if (req.query.select && !req.query.all) {
+  if (req.query.select) {
     selectArray = req.query.select.split(",");
     queryString = queryString.select(selectArray);
   }

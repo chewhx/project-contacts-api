@@ -10,7 +10,7 @@
 @queryAll = all=true
 ### 
 # @name getAllContacts
-GET {{hostname}}{{route}}?{{queryAll}}&{{querylimit}}&{{querypage}}&{{querySort}}
+GET {{hostname}}{{route}}?{{queryAll}}&{{querylimit}}&{{querypage}}&{{querySort}}&{{querySelect}}
 
 
 ### 
