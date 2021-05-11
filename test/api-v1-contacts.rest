@@ -3,7 +3,7 @@
 @hostname = http://{{host}}:{{port}}
 @route = /api/v1/contacts
 @paramsId = {{postContact.response.body.data.$._id}}
-@querySelect = select=name,organisation,position
+@querySelect = select=name.firstName
 @querySort = sort=name
 @querylimit = limit=6
 @querypage = page=10

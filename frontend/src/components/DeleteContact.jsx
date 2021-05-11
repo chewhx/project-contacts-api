@@ -25,13 +25,19 @@ const getNestedObject = (nestedObj, pathArr) => {
 
 const DeleteContact = () => {
   const [contact, setContact] = useState();
-  const URL = `https://project-contacts-api.vercel.app/api/v1/contacts`;
+  const URL = `https://project-contacts-api.vercel.app/api/v1/contacts?all=true`;
 
   const fetchContacts = async () => {
     const res = await fetch(URL);
     return res.json();
   };
-  const { data, status } = useQuery("contacts", fetchContacts);
+  const { data, status } = useQuery("contacts", fetchContacts, {
+    onSuccess: (data) => setContact(data.data[0]),
+  });
+
+  // if (data) {
+  //   setContact(data.data[0]);
+  // }
 
   return status === "loading" ? (
     "Loading..."
@@ -44,11 +50,11 @@ const DeleteContact = () => {
         <select
           id="contact-id"
           className="form-control"
-          onChange={(e) =>
-            setContact(
-              data.data.filter((contact) => contact._id === e.target.value)[0]
-            )
-          }
+          // onChange={(e) =>
+          //   setContact(
+          //     data.data.filter((contact) => contact._id === e.target.value)[0]
+          //   )
+          // }
         >
           {data.data.map((contact, idx) => (
             <option
@@ -58,9 +64,16 @@ const DeleteContact = () => {
           ))}
         </select>
       </form>
-      {contact && fields.map(([label, keys], idx) => (
-        <ContactRow key={`delete-${idx}`} label={label} info={getNestedObject(contact, keys)} />
-      ))}
+      <ul className="list-group my-4">
+        {contact &&
+          fields.map(([label, keys], idx) => (
+            <ContactRow
+              key={`delete-${idx}`}
+              label={label}
+              info={getNestedObject(contact, keys)}
+            />
+          ))}
+      </ul>
       <button type="button" className="btn btn-danger">
         DELETE
       </button>
@@ -71,9 +84,11 @@ const DeleteContact = () => {
 export default DeleteContact;
 
 const ContactRow = ({ label, info }) => (
-  <li className="list-group item">
+  <li className="list-group-item">
     <div className="row">
-      <div className="col-2">{label}</div>
+      <div className="col-2">
+        <strong>{label}</strong>
+      </div>
       <div className="col-10">{info}</div>
     </div>
   </li>

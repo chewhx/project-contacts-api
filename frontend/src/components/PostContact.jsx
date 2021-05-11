@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { Formik } from "formik";
 import faker from "faker/locale/en";
 import fakerzh from "faker/locale/zh_CN";
+import axios from "axios";
+import { useAlert } from "react-alert";
+import { URL } from "../utils/constants";
 
 const fields = [
   ["Salutation", ["salutation"]],
@@ -66,10 +69,22 @@ const generateRandomData = () => {
 };
 
 const PostContact = () => {
+  const alert = useAlert();
+
+  const [loading, setLoading] = useState(false);
+
+  const postNewContact = async (values) => {
+    const res = await axios.post(`${URL}`, values);
+    if (res.data.success === true) {
+      generateRandomData();
+      console.log(res);
+      alert.success("New contact created");
+    }
+  };
   return (
     <Formik
       initialValues={generateRandomData()}
-      onSubmit={(values) => console.log(values)}
+      onSubmit={(values) => postNewContact(values)}
       enableReinitialize={true}
     >
       {({ values, handleChange, handleBlur, setValues, handleSubmit }) => {
@@ -142,6 +157,14 @@ const PostContact = () => {
                     onClick={handleSubmit}
                   >
                     POST
+                    {loading && (
+                      <span>
+                        <div
+                          className="ml-2 spinner-border spinner-border-sm"
+                          role="status"
+                        ></div>
+                      </span>
+                    )}
                   </button>
                   <button
                     type="button"
@@ -149,6 +172,13 @@ const PostContact = () => {
                     onClick={() => setValues(generateRandomData())}
                   >
                     RANDOM
+                  </button>
+                  <button
+                    type="button"
+                    className="btn mr-3 btn-success"
+                    onClick={() => setLoading((prev) => !prev)}
+                  >
+                    LOADING
                   </button>
                 </div>
               </div>
