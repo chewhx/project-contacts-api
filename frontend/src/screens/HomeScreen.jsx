@@ -1,5 +1,6 @@
 import React from "react";
 import { Switch, Route, useRouteMatch } from "react-router-dom";
+import DeleteContact from "../components/DeleteContact";
 import GetContacts from "../components/GetContacts";
 import PostContact from "../components/PostContact";
 import PutContact from "../components/PutContact";
@@ -57,7 +58,6 @@ const HomeScreen = () => {
 
       <section id="routes" className="container max-w-4xl py-5 my-5">
         <h1>Routes</h1>
-        <p>There are basic CRUD operations:</p>
         <ul className="list-unstyled">
           {crudInfo.map((each, idx) => (
             <li key={`resource-${idx}`}>
@@ -87,15 +87,32 @@ const HomeScreen = () => {
       <section id="postOne" className="container-fluid bg-white py-5">
         <div className="container py-5">
           <h1>POST - /api/v1/contacts</h1>
+          <p className="alert alert-secondary">
+            Note: For security purposes, data will not be posted to the actual
+            database without a test key.
+          </p>
           <PostContact />
         </div>
       </section>
       <section id="putOne" className="container-fluid bg-light py-5">
         <div className="container py-5">
           <h1>PUT - /api/v1/contacts</h1>
+          <p className="alert alert-secondary">
+            Select a contact from the <a href="#getAll">GET</a> section to begin
+            submitting changes.
+          </p>
           <Switch>
             <Route path={`/put/:id`} component={PutContact} />
           </Switch>
+        </div>
+      </section>
+      <section id="deleteOne" className="container-fluid py-5">
+        <div className="container py-5">
+          <h1>DELETE - /api/v1/contacts/:id</h1>
+          <p className="alert alert-secondary">
+            Note: 
+          </p>
+          <DeleteContact />
         </div>
       </section>
     </>

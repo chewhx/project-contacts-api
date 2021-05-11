@@ -40,9 +40,6 @@ const Contacts = () => {
     "Error fetching data"
   ) : (
     <>
-      <p>
-        Page {page} / {data.pages}{" "}
-      </p>
       <div className="table-responsive">
         <table className="table table-sm table-bordered table-hover">
           <thead>
@@ -124,7 +121,7 @@ const Contacts = () => {
       </div>
       <div className="pagination">
         <button
-          className="page-item btn btn-outline-primary"
+          className="page-item btn mr-2 btn-outline-primary"
           onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
           disabled={!data.pagination.prev}
         >
@@ -133,7 +130,9 @@ const Contacts = () => {
         {Array.from(Array(data.pages).keys()).map((each, idx) => (
           <button
             key={`page-btn-${idx}`}
-            className="page-item btn btn-outline-primary"
+            className={`page-item btn mr-2 ${
+              page === each + 1 ? "btn-primary" : "btn-outline-primary"
+            }`}
             onClick={() => setPage(each + 1)}
             disabled={page === each + 1}
           >

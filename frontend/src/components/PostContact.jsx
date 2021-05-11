@@ -76,7 +76,7 @@ const PostContact = () => {
         // formik js functions here
         return (
           <>
-            <form>
+            <form className="my-5">
               <div className="row">
                 <div className="col-md-6 form-group">
                   <label htmlFor={fields[0][1]}>{fields[0][0]}</label>

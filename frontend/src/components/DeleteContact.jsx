@@ -58,8 +58,8 @@ const DeleteContact = () => {
           ))}
         </select>
       </form>
-      {fields.map(([label, keys], idx) => (
-        <ContactRow label={label} info={getNestedObject(contact, keys)} />
+      {contact && fields.map(([label, keys], idx) => (
+        <ContactRow key={`delete-${idx}`} label={label} info={getNestedObject(contact, keys)} />
       ))}
       <button type="button" className="btn btn-danger">
         DELETE
