@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
 import Navbar from "./components/Navbar";
+import GlobalContextProvider from "./context";
 // import GetContacts from "./components/GetContacts";
 // import PostContact from "./components/PostContact";
 // import PutContact from "./components/PutContact";
@@ -16,6 +17,7 @@ const App = () => {
     // you can also just use 'bottom center'
     position: positions.TOP_CENTER,
     transition: transitions.FADE,
+    timeout: 5000,
     containerStyle: {
       zIndex: 1200,
       width: "100vw",
@@ -23,12 +25,14 @@ const App = () => {
     },
   };
   return (
-    <AlertProvider template={Notification} {...options}>
-      <QueryClientProvider client={queryClient}>
-        <Navbar />
-        <Route path={`/`} component={HomeScreen} />
-      </QueryClientProvider>
-    </AlertProvider>
+    <GlobalContextProvider>
+      <AlertProvider template={Notification} {...options}>
+        <QueryClientProvider client={queryClient}>
+          <Navbar />
+          <Route path={`/`} component={HomeScreen} />
+        </QueryClientProvider>
+      </AlertProvider>
+    </GlobalContextProvider>
   );
 };
 

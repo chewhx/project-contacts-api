@@ -1,10 +1,12 @@
-import React from "react";
-import { Switch, Route, useRouteMatch } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Switch, Route, useParams } from "react-router-dom";
 import { useAlert } from "react-alert";
 import DeleteContact from "../components/DeleteContact";
 import GetContacts from "../components/GetContacts";
 import PostContact from "../components/PostContact";
 import PutContact from "../components/PutContact";
+import ReactModal from "react-modal";
+import { GlobalContext } from "../context";
 
 const crudInfo = [
   {
@@ -40,12 +42,25 @@ const crudInfo = [
 ];
 
 const HomeScreen = () => {
-  const match = useRouteMatch();
-  console.log("match", match);
   const alert = useAlert();
+  const params = useParams();
+
+  const { selectedContact, setSelectedContact } = useContext(GlobalContext);
+
+  const [modal, setModal] = useState(false);
+
+  ReactModal.defaultStyles.content.zIndex = "1200px";
 
   return (
     <>
+      
+      <button
+        type="button"
+        className="btn btn-primary"
+        onClick={() => setModal(true)}
+      >
+        Modal
+      </button>
       <section
         id="top"
         className="container-fluid py-5 mb-5"
@@ -58,36 +73,6 @@ const HomeScreen = () => {
           <h4>Mock data API for prototyping address book application</h4>
         </div>
       </section>
-
-      <button
-        type="button"
-        className="btn btn-primary"
-        onClick={() => {
-          alert.show("This is an info alert");
-        }}
-      >
-        ALERT
-      </button>
-      <button
-        type="button"
-        className="btn btn-primary"
-        onClick={() => {
-          alert.error("An alert!");
-        }}
-      >
-        ERROR
-      </button>
-      <button
-        type="button"
-        className="btn btn-primary"
-        onClick={() => {
-          alert.success(
-            " Lorem ipsum dolor sit amet consectetur adipisicing elit. Sequi doloribus voluptas eaque hic obcaecati tempora aliquid ullam fugit quia saepe, veritatis, vero explicabo pariatur quaerat omnis ipsum optio natus ab."
-          );
-        }}
-      >
-        SUCCESS
-      </button>
       <section id="routes" className="container max-w-4xl py-5 my-5">
         <h1>Routes</h1>
         <ul className="list-unstyled">

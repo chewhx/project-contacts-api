@@ -1,70 +1,49 @@
 import React, { useState } from "react";
 import { Formik } from "formik";
 import { useQuery } from "react-query";
+import { useAlert } from "react-alert";
 import axios from "axios";
 import { useRouteMatch } from "react-router-dom";
-
-const fields = [
-  ["Salutation", ["salutation"]],
-  ["First Name", ["name", "firstName"]],
-  ["Last Name", ["name", "lastName"]],
-  ["Alias", ["name", "alias"]],
-  ["Organisation", ["organisation"]],
-  ["Position", ["position"]],
-  ["Address", ["address"]],
-  ["Telephone", ["contact", "telephone"]],
-  ["Mobile", ["contact", "mobile"]],
-  ["Email", ["contact", "email"]],
-  ["Notes", ["notes"]],
-];
-
-const getNestedObject = (nestedObj, pathArr) => {
-  return pathArr.reduce(
-    (obj, key) => (obj && obj[key] !== "undefined" ? obj[key] : undefined),
-    nestedObj
-  );
-};
-// Credits for nested object function: https://hackernoon.com/accessing-nested-objects-in-javascript-f02f1bd6387f
+import { FIELDS, URL, TIMESTAMP } from "../utils/constants";
+import getNestedObject from "../utils/getNestedObject";
+import Spinner from "./Spinner";
+import { GlobalContext } from "../context";
 
 const PutContact = () => {
+  const alert = useAlert();
   const { params } = useRouteMatch();
   console.log(params);
-  const [putStatus, setPutStatus] = useState({
-    success: false,
-    message: "",
-  });
 
-  const URL = `https://project-contacts-api.vercel.app/api/v1/contacts/${params.id}`;
+  const { selectedContact } = React.useContext(GlobalContext);
+
+  const [loading, setLoading] = useState(false);
 
   const fetchContactById = async () => {
-    const res = await fetch(URL);
+    const res = await fetch(`${URL}/${selectedContact}`);
     return res.json();
   };
 
   const onSubmit = async (values) => {
     try {
-      const res = await axios.put(URL, values);
+      const res = await axios.put(`${URL}/${selectedContact}`, values);
       if (res.data.success === true) {
-        setPutStatus({
-          success: true,
-          message: `Update successful for contact id ${params.id}`,
-        });
+        setLoading(false);
+        alert.success(`Contact updated - ${TIMESTAMP}`);
       }
     } catch (error) {
       if (error.response) {
         console.log(error.response.data);
-        setPutStatus({
-          success: false,
-          message: `Error updating contact id ${
-            params.id
-          } - ${error.response.data.error.join(". ")}`,
-        });
+        alert.error(
+          `Error updating contact ${selectedContact} - ${error.response.data.error.join(
+            ". "
+          )}`
+        );
+        setLoading(false);
       }
     }
   };
 
   const { data, status } = useQuery(["contact", params.id], fetchContactById);
-  console.log(status);
 
   return status === "loading" ? (
     "Loading..."
@@ -73,19 +52,22 @@ const PutContact = () => {
   ) : (
     <Formik
       initialValues={data.data}
-      onSubmit={(values) => onSubmit(values)}
+      onSubmit={(values) => {
+        setLoading(true);
+        onSubmit(values);
+      }}
       enableReinitialize={true}
     >
       {({ values, handleChange, handleBlur, handleSubmit }) => {
         // formik js functions here
         return (
           <>
-            <form className="my-5">
+            <form className="my-5 container">
               <div className="row">
                 <div className="col-md-6 form-group">
-                  <label htmlFor={fields[0][1]}>{fields[0][0]}</label>
+                  <label htmlFor={FIELDS[0][1]}>{FIELDS[0][0]}</label>
                   <select
-                    id={fields[0][1]}
+                    id={FIELDS[0][1]}
                     className="form-control"
                     onChange={handleChange}
                     value={values["salutation"]}
@@ -107,35 +89,33 @@ const PutContact = () => {
                     ))}
                   </select>
                 </div>
-                {fields
-                  .filter(
-                    (each) => each[0] !== "Salutation" && each[0] !== "Notes"
-                  )
-                  .map(([label, key], idx) => (
-                    <div
-                      key={`post-field-${key}-${idx}`}
-                      className="col-md-6 form-group"
-                    >
-                      <label htmlFor={key.join(".")}>{label}</label>
-                      <input
-                        type="text"
-                        id={key.join(".")}
-                        onBlur={handleBlur}
-                        value={getNestedObject(values, key)}
-                        className="form-control"
-                        onChange={handleChange}
-                      />
-                    </div>
-                  ))}
+                {FIELDS.filter(
+                  (each) => each[0] !== "Salutation" && each[0] !== "Notes"
+                ).map(([label, key], idx) => (
+                  <div
+                    key={`post-field-${key.join(".")}-${idx}`}
+                    className="col-md-6 form-group"
+                  >
+                    <label htmlFor={key.join(".")}>{label}</label>
+                    <input
+                      type="text"
+                      id={key.join(".")}
+                      onBlur={handleBlur}
+                      value={getNestedObject(values, key)}
+                      className="form-control"
+                      onChange={handleChange}
+                    />
+                  </div>
+                ))}
                 <div className="col-12 form-group">
-                  <label htmlFor={fields[fields.length - 1][1]}>
-                    {fields[fields.length - 1][0]}
+                  <label htmlFor={FIELDS[FIELDS.length - 1][1]}>
+                    {FIELDS[FIELDS.length - 1][0]}
                   </label>
                   <textarea
-                    id={fields[fields.length - 1][1][0]}
+                    id={FIELDS[FIELDS.length - 1][1][0]}
                     onBlur={handleBlur}
                     className="form-control"
-                    value={values[fields[fields.length - 1][1][0]]}
+                    value={values[FIELDS[FIELDS.length - 1][1][0]]}
                     onChange={handleChange}
                   />
                 </div>
@@ -145,15 +125,22 @@ const PutContact = () => {
                     className="btn mr-3 btn-info"
                     onClick={handleSubmit}
                   >
-                    PUT / UPDATE
+                    {!loading ? (
+                      `Update contact`
+                    ) : (
+                      <>
+                        <Spinner className="spinner-border-sm mr-2" />
+                        <span>Updating...</span>
+                      </>
+                    )}
                   </button>
-                  <span
-                    className={
-                      putStatus.success ? "text-success" : "text-danger"
-                    }
+                  <button
+                    type="button"
+                    className="btn mr-3 btn-danger"
+                    onClick={handleSubmit}
                   >
-                    {putStatus && putStatus.message}
-                  </span>
+                    Delete
+                  </button>
                 </div>
               </div>
             </form>

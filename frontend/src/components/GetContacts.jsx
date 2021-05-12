@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useQuery } from "react-query";
-import { Link, useHistory } from "react-router-dom";
 import getNestedObject from "../utils/getNestedObject";
+import ReactModal from "react-modal";
+import PutContact from "../components/PutContact";
+import { GlobalContext } from "../context";
 
 const fields = [
   ["Salutation", ["salutation"]],
@@ -16,6 +18,8 @@ const fields = [
 ];
 
 const GetContacts = () => {
+  const { setSelectedContact } = React.useContext(GlobalContext);
+  const [modal, setModal] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState("name.firstName");
@@ -27,7 +31,6 @@ const GetContacts = () => {
   let selectURLquery = select.length >= 1 ? `&select=${String(select)}` : ``;
 
   const URL = `https://project-contacts-api.vercel.app/api/v1/contacts?${sortURLquery}&${limitURLquery}&${pageURLquery}${selectURLquery}`;
-
 
   const fetchContacts = async () => {
     const res = await fetch(URL);
@@ -42,12 +45,47 @@ const GetContacts = () => {
     }
   );
 
+  ReactModal.setAppElement("#root");
+
   return status === "loading" ? (
     "Loading..."
   ) : status === "error" ? (
     "Error fetching data"
   ) : (
     <>
+      {/* ================ Modal ================== */}
+      <ReactModal
+        isOpen={modal}
+        style={{
+          overlay: {
+            zIndex: "2300px",
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+          },
+          content: {
+            marginTop: "30px",
+            zIndex: "2300px",
+            border: "none",
+          },
+        }}
+        overlayElement={
+          (props, contentElement) => (
+            <div {...props} onClick={() => setModal(false)}>
+              {contentElement}
+            </div>
+          )
+          /* Custom Overlay element. */
+        }
+      >
+        <button
+          type="button"
+          className="btn close"
+          onClick={() => setModal(false)}
+        >
+          <span>&times;</span>
+        </button>
+        <PutContact id={"6093e1550635fed8b099e746"} />
+      </ReactModal>
+
       {/* ================ Pagination ================== */}
       <div className="card mb-4">
         <div className="card-body">
@@ -102,7 +140,14 @@ const GetContacts = () => {
           </thead>
           <tbody>
             {data.data.map((contact, idx) => (
-              <ContactRow key={`contact-${idx}`} contact={contact} />
+              <ContactRow
+                key={`contact-${idx}`}
+                contact={contact}
+                onClick={() => {
+                  setSelectedContact(contact._id);
+                  setModal(true);
+                }}
+              />
             ))}
           </tbody>
         </table>
@@ -220,10 +265,9 @@ const GetContacts = () => {
   );
 };
 
-const ContactRow = ({ contact }) => {
-  const history = useHistory();
+const ContactRow = ({ contact, ...rest }) => {
   return (
-    <tr onClick={() => history.push(`/put/${contact._id}`)}>
+    <tr {...rest}>
       {fields.map((each, idx) => (
         <td key={`get-table-info-row-${contact._id}-${idx}`}>
           {getNestedObject(contact, each[1])}
