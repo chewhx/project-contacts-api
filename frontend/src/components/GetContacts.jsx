@@ -4,6 +4,7 @@ import getNestedObject from "../utils/getNestedObject";
 import ReactModal from "react-modal";
 import PutContact from "../components/PutContact";
 import { GlobalContext } from "../context";
+import Spinner from "../components/Spinner";
 
 const fields = [
   ["Salutation", ["salutation"]],
@@ -18,8 +19,8 @@ const fields = [
 ];
 
 const GetContacts = () => {
-  const { setSelectedContact } = React.useContext(GlobalContext);
-  const [modal, setModal] = useState(false);
+  const { setSelectedContact, showModal, setShowModal } =
+    React.useContext(GlobalContext);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [sort, setSort] = useState("name.firstName");
@@ -37,7 +38,7 @@ const GetContacts = () => {
     return res.json();
   };
 
-  const { status, data, isPreviousData, refetch } = useQuery(
+  const { status, data, isPreviousData, refetch, isFetching } = useQuery(
     ["contacts", page, limit, sort],
     fetchContacts,
     {
@@ -55,31 +56,33 @@ const GetContacts = () => {
     <>
       {/* ================ Modal ================== */}
       <ReactModal
-        isOpen={modal}
+        isOpen={showModal}
         style={{
           overlay: {
-            zIndex: "2300px",
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backgroundColor: "var(--light)",
+            opacity: "75%",
+            zIndex: "2200px",
           },
           content: {
+            position: "fixed",
             marginTop: "30px",
             zIndex: "2300px",
             border: "none",
           },
         }}
-        overlayElement={
-          (props, contentElement) => (
-            <div {...props} onClick={() => setModal(false)}>
+        overlayElement={(props, contentElement) => {
+          return (
+            <>
+              <div {...props} onClick={() => setShowModal(false)}></div>
               {contentElement}
-            </div>
-          )
-          /* Custom Overlay element. */
-        }
+            </>
+          );
+        }}
       >
         <button
           type="button"
-          className="btn close"
-          onClick={() => setModal(false)}
+          className="btn close sticky-top"
+          onClick={() => setShowModal(false)}
         >
           <span>&times;</span>
         </button>
@@ -128,7 +131,18 @@ const GetContacts = () => {
 
       {/* ================ Table ================== */}
       <div className="table-responsive">
-        <table className="table table-sm bg-white table-hover">
+        <table
+          className={`table bg-white table-borderless ${
+            !isFetching && `table-hover`
+          }`}
+        >
+          <thead>
+            <th className="text-center" colSpan="10">
+              <span className="ml-4">
+                Page {page} / {data.pages}
+              </span>
+            </th>
+          </thead>
           <thead>
             <tr>
               {fields.map((each, idx) => (
@@ -143,9 +157,12 @@ const GetContacts = () => {
               <ContactRow
                 key={`contact-${idx}`}
                 contact={contact}
+                style={{ cursor: "pointer" }}
                 onClick={() => {
-                  setSelectedContact(contact._id);
-                  setModal(true);
+                  if (!isFetching) {
+                    setSelectedContact(contact._id);
+                    setShowModal(true);
+                  }
                 }}
               />
             ))}
@@ -280,7 +297,10 @@ const ContactRow = ({ contact, ...rest }) => {
 const FieldCheckBox = ({ label, onChange, value, defaultChecked }) => {
   return (
     <>
-      <div className="custom-control custom-switch custom-control-inline">
+      <div
+        className="custom-control custom-switch custom-control-inline"
+        style={{ zIndex: "0" }}
+      >
         <input
           type="checkbox"
           className="custom-control-input"

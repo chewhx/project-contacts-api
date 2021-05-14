@@ -2,14 +2,13 @@ import React from "react";
 import { Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
-import Navbar from "./components/Navbar";
 import GlobalContextProvider from "./context";
-// import GetContacts from "./components/GetContacts";
-// import PostContact from "./components/PostContact";
-// import PutContact from "./components/PutContact";
-// import DeleteContact from "./components/DeleteContact";
-import HomeScreen from "./screens/HomeScreen";
+import Navbar from "./components/Navbar";
 import Notification from "./components/Notification";
+import HomeScreen from "./screens/HomeScreen";
+import ContactsScreen from "./screens/ContactsScreen";
+import AddScreen from "./screens/AddScreen";
+import PutContact from "./components/PutContact";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -29,7 +28,10 @@ const App = () => {
       <AlertProvider template={Notification} {...options}>
         <QueryClientProvider client={queryClient}>
           <Navbar />
-          <Route path={`/`} component={HomeScreen} />
+          <Route exact path={`/addcontacts`} component={AddScreen} />
+          <Route exact path={`/contacts/:id`} component={PutContact} />
+          <Route exact path={`/contacts`} component={ContactsScreen} />
+          <Route exact path={`/`} component={HomeScreen} />
         </QueryClientProvider>
       </AlertProvider>
     </GlobalContextProvider>
