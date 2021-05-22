@@ -15,6 +15,7 @@ const contactSchema = new mongoose.Schema(
     organisation: String,
     position: String,
     address: String,
+    activateGeocode: { type: Boolean, required: true, default: false },
     location: {
       // GeoJSON Point
       type: {
@@ -82,5 +83,40 @@ const contactSchema = new mongoose.Schema(
 //   };
 //   next();
 // });
+
+contactSchema.methods.geocode = async function () {
+  // return if the address is not modified
+  console.log("this.isModified(address)", this.isModified("address"));
+  console.log("this.isNew ", this.isNew);
+  if (this.isNew || this.isModified("address")) {
+    // execute geocoding
+    const res = await geocoder.geocode(this.address);
+    // destructure results for required variables - results returned in an array of object, so get the first object res[0]
+    const {
+      longitude,
+      latitude,
+      formattedAddress,
+      streetName: street,
+      city,
+      zipcode,
+      country,
+    } = res[0];
+    // set this.address to undefined, so it will not be saved to db
+    console.log(`Google geocoding ran`.red);
+    this.address = undefined;
+    // save geocoding info as location in db
+    this.location = {
+      longitude,
+      latitude,
+      formattedAddress,
+      street,
+      city,
+      zipcode,
+      country,
+    };
+    this.save();
+    return this;
+  }
+};
 
 module.exports = new mongoose.model("contact", contactSchema);

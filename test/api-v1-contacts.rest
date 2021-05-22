@@ -26,13 +26,14 @@ Content-Type: application/json
 {
    "salutation": "Mdm",
   "name": {
-    "firstName": "Galven",
-    "lastName": "Bellsham",
+    "firstName": "Charmander",
+    "lastName": "Fire",
     "alias": "碧萱"
   },
-  "organisation": "Johnson, O'Reilly and DuBuque",
+  "organisation": "Pokemon Center",
   "position": "Fusce posuere felis sed lacus.",
   "address": "1 HarbourFront Walk Singapore",
+  "activateGeocode": true,
   "contact": {
     "telephone": "+7-812-937-8305",
     "mobile": "6559256698",
@@ -49,11 +50,13 @@ Content-Type: application/json
 
 {
  "name": {
-    "firstName": "Red",
+    "firstName": "Blue",
     "lastName": "Berry"
   },
   "salutation": "Ms",
-  "address": "28 Temenggong Road Singapore"
+  "address": "140 bedok reservoir road",
+  "addressTouched": true,
+  "activateGeocode": true
 }
 
 

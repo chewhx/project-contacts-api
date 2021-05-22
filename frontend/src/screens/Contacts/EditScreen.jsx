@@ -3,32 +3,26 @@ import { Formik } from "formik";
 import { useQuery } from "react-query";
 import { useAlert } from "react-alert";
 import axios from "axios";
-import { Link, useRouteMatch } from "react-router-dom";
-import { FIELDS, URL, TIMESTAMP } from "../utils/constants";
-import getNestedObject from "../utils/getNestedObject";
-import Spinner from "./Spinner";
-import { GlobalContext } from "../context";
+import { Link } from "react-router-dom";
+import { FIELDS, URL, TIMESTAMP } from "../../utils/constants";
+import getNestedObject from "../../utils/getNestedObject";
+import Spinner from "../../components/Spinner";
 
 const PutContact = ({ match }) => {
   const alert = useAlert();
-  const { params } = useRouteMatch();
-  console.log(params);
-
-  const { selectedContact, setShowModal } = React.useContext(GlobalContext);
 
   const [areYouSure, setAreYouSure] = useState(false);
 
   const fetchContactById = async () => {
-    const res = await fetch(`${URL}/${selectedContact || match.params.id}`);
+    console.log(match);
+    console.log(`${URL}/${match.params.id}}`);
+    const res = await fetch(`${URL}/${match.params.id}`);
     return res.json();
   };
 
   const onSubmit = async (values) => {
     try {
-      const res = await axios.put(
-        `${URL}/${selectedContact || match.params.id}`,
-        values
-      );
+      const res = await axios.put(`${URL}/${match.params.id}`, values);
       if (res.data.success === true) {
         alert.success(`Contact updated - ${TIMESTAMP}`);
       }
@@ -37,7 +31,7 @@ const PutContact = ({ match }) => {
         console.log(error.response.data);
         alert.error(
           `Error updating contact ${
-            selectedContact || match.params.id
+            match.params.id
           } - ${error.response.data.error.join(". ")}`
         );
       }
@@ -48,7 +42,6 @@ const PutContact = ({ match }) => {
     try {
       const res = await axios.delete(`${URL}/${id}`);
       if (res.data.success === true) {
-        setShowModal(false);
         alert.success(`Contact deleted - ${TIMESTAMP}`);
       }
     } catch (error) {
@@ -56,14 +49,14 @@ const PutContact = ({ match }) => {
         console.log(error.response.data);
         alert.error(
           `Error deleting contact ${
-            selectedContact || match.params.id
+            match.params.id
           } - ${error.response.data.error.join(". ")}`
         );
       }
     }
   };
 
-  const { data, status } = useQuery(["contact", params.id], fetchContactById);
+  const { data, status } = useQuery(["contact", match], fetchContactById);
 
   return status === "loading" ? (
     <div className="text-center h-100 pt-5">
@@ -90,11 +83,8 @@ const PutContact = ({ match }) => {
                 Edit contact
                 <span>
                   <button type="button" className="btn btn-link ml-auto">
-                    <Link
-                      to={`/contacts/${selectedContact || match.params.id}`}
-                      target="_blank"
-                    >
-                      <i class="bi bi-box-arrow-in-up-right"></i>
+                    <Link to={`/contacts/${match.params.id}`} target="_blank">
+                      <i className="bi bi-box-arrow-in-up-right"></i>
                     </Link>
                   </button>
                 </span>

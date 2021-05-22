@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { Formik } from "formik";
 import axios from "axios";
+import { useQuery } from "react-query";
 import { useAlert } from "react-alert";
 import { URL, FIELDS } from "../utils/constants";
 import generateRandomData from "../utils/genRandomData";
@@ -9,6 +10,20 @@ import Spinner from "../components/Spinner";
 
 const PostContact = () => {
   const alert = useAlert();
+
+  const countryCodesFetchQuery = async () => {
+    const res = await fetch(
+      `https://restcountries.eu/rest/v2/all?fields=name;callingCodes;alpha2Code`
+    );
+    return res.json();
+  };
+
+  const { status, data: countryCodes } = useQuery(
+    "countryCodes",
+    countryCodesFetchQuery,
+    { keepPreviousData: true }
+  );
+  console.log(countryCodes);
 
   const postNewContact = async (values) => {
     try {
@@ -113,6 +128,29 @@ const PostContact = () => {
                         onChange={handleChange}
                         disabled={isSubmitting}
                       />
+                    </div>
+                  </div>
+                </li>
+                <li className="list-group-item">
+                  <div className="row">
+                    <div className="col-md-2">
+                      <strong>{`Code`}</strong>
+                    </div>
+                    <div className="col-md-10">
+                      <select
+                        list="country-calling-codes"
+                        className="form-control bg-light"
+                      >
+                        {status === "success" &&
+                          countryCodes.map((each, idx) => (
+                            <option
+                              key={`country-code-${idx}`}
+                              value={`+${each.callingCodes[0]}`}
+                            >
+                              {`${each.name} +${each.callingCodes[0]} `}
+                            </option>
+                          ))}
+                      </select>
                     </div>
                   </div>
                 </li>

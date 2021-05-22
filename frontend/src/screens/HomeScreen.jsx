@@ -1,79 +1,46 @@
 import React from "react";
-import ReactModal from "react-modal";
-import AllContacts from "../components/AllContacts";
-
-const crudInfo = [
-  {
-    method: "GET",
-    route: "/api/v1/contacts",
-    description: "Get all contacts",
-    sectionId: "getAll",
-  },
-  {
-    method: "GET",
-    route: "/api/v1/contacts/:id",
-    description: "Get a contact by id",
-    sectionId: "getOne",
-  },
-  {
-    method: "POST",
-    route: "/api/v1/contacts",
-    description: "Create a contact",
-    sectionId: "postOne",
-  },
-  {
-    method: "PUT",
-    route: "/api/v1/contacts/:id",
-    description: "Update a contact by id",
-    sectionId: "putOne",
-  },
-  {
-    method: "DELETE",
-    route: "/api/v1/contacts/:id",
-    description: "Delete a contact",
-    sectionId: "deleteOne",
-  },
-];
+import { useQuery } from "react-query";
+import FullTable from "../react-table/FullTable";
+import { URL } from "../utils/constants";
+import columns from "../react-table/columns";
 
 const HomeScreen = () => {
-  ReactModal.defaultStyles.content.zIndex = "1200px";
+  const contactsFetchQuery = async () => {
+    const res = await fetch(`${URL}?all=true`);
+    return res.json();
+  };
+  const { status, data } = useQuery("contacts", contactsFetchQuery, {
+    keepPreviousData: true,
+  });
 
   return (
     <>
-      <section
-        id="top"
-        className="container-fluid py-5 mb-5"
-        style={{ background: "var(--primary)" }}
-      >
-        <div className="container max-w-4xl py-5">
-          <p className="display-4 mt-5">
-            <strong>{`{Contacts} API`}</strong>
-          </p>
-          <h4>Mock data API for prototyping address book application</h4>
-        </div>
-      </section>
-      <section id="routes" className="container max-w-4xl py-5 my-5">
-        <h1>Routes</h1>
-        <ul className="list-unstyled">
-          {crudInfo.map((each, idx) => (
-            <li key={`resource-${idx}`}>
-              <div className="row">
-                <div className="col-md-1 col-sm-2">
-                  <a href={`/#${each.sectionId}`}>
-                    <p>{each.method}</p>
-                  </a>
-                </div>
-                <div className="col-md-2 col-sm-3">
-                  <p> {each.route}</p>
-                </div>
-                <div className="col-lg-auto col-md-12">{each.description}</div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-      <section id="allContacts" className=" max-w-4xl py-5 my-5">
-        <AllContacts />
+      
+      <section id="allContacts" className=" max-w-4xl my-5">
+        {status === "loading" && !data ? (
+          <>
+            <div className="text-center h-100 pt-5">
+              <i
+                className="bi bi-cloud-download"
+                style={{ fontSize: "10rem" }}
+              ></i>
+              <p>Fetching your awesome contacts...</p>
+            </div>
+          </>
+        ) : status === "error" ? (
+          <>
+            <div className="text-center h-100 pt-5">
+              <i
+                className="bi bi-exclamation-circle"
+                style={{ fontSize: "10rem" }}
+              ></i>
+              <h5>Error loading your data...</h5>
+              <p>Please check with the administrator</p>
+            </div>
+          </>
+        ) : status === "success" ? (
+          <FullTable data={data} columns={columns} />
+        ) : null}
       </section>
     </>
   );

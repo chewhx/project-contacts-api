@@ -1,5 +1,5 @@
 import React from "react";
-import PostContact from "../components/PostContact";
+import PostContact from "../../components/PostContact";
 
 const AddScreen = () => {
   return (

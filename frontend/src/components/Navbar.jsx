@@ -3,11 +3,12 @@ import { NavLink, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const location = useLocation();
+
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <a className="navbar-brand" href="/">
-          PROJECT-CONTACTS-API
+        <i className="bi bi-person-circle h1"></i>
         </a>
         <button
           className="navbar-toggler"
@@ -25,25 +26,16 @@ const Navbar = () => {
             <li className="nav-item">
               <NavLink
                 className={`nav-link ${
-                  location.pathname === "/contacts" && "disabled"
+                  location.pathname === "/add" && "disabled"
                 }`}
-                to={"/contacts"}
-              >
-                All contacts
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink
-                className={`nav-link ${
-                  location.pathname === "/addcontacts" && "disabled"
-                }`}
-                to={"/addcontacts"}
+                to={"/add"}
               >
                 Add contact
               </NavLink>
             </li>
           </ul>
         </div>
+   
       </nav>
     </>
   );

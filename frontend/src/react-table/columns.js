@@ -1,6 +1,22 @@
 import { Link } from "react-router-dom";
-
+import IndeterminateCheckbox from "./IndeterminateCheckbox";
 const columns = [
+  {
+    id: "selection",
+    Header: ({ getToggleAllRowsSelectedProps }) => (
+      <>
+        <IndeterminateCheckbox {...getToggleAllRowsSelectedProps()} />
+      </>
+    ),
+    Cell: ({ row }) => (
+      <>
+        <IndeterminateCheckbox
+          id={`row-${row.id}`}
+          {...row.getToggleRowSelectedProps()}
+        />
+      </>
+    ),
+  },
   {
     Header: "",
     accessor: "_id",

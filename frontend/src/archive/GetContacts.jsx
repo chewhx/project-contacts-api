@@ -3,28 +3,17 @@ import { useQuery } from "react-query";
 import getNestedObject from "../utils/getNestedObject";
 import ReactModal from "react-modal";
 import PutContact from "../components/PutContact";
-import { GlobalContext } from "../context";
-import Spinner from "../components/Spinner";
+import { GlobalContext } from "./context";
+import { FIELDS } from "../utils/constants";
+import { FieldArray, Formik } from "formik";
 
-const fields = [
-  ["Salutation", ["salutation"]],
-  ["First Name", ["name", "firstName"]],
-  ["Last Name", ["name", "lastName"]],
-  ["Alias", ["name", "alias"]],
-  ["Organisation", ["organisation"]],
-  ["Position", ["position"]],
-  ["Telephone", ["contact", "telephone"]],
-  ["Mobile", ["contact", "mobile"]],
-  ["Email", ["contact", "email"]],
-];
-
-const GetContacts = () => {
+const ContactsTable = () => {
   const { setSelectedContact, showModal, setShowModal } =
     React.useContext(GlobalContext);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
   const [sort, setSort] = useState("name.firstName");
-  const [select, setSelect] = useState(fields.map((each) => each[1].join(".")));
+  const [select, setSelect] = useState(FIELDS.map((each) => each[1].join(".")));
 
   let limitURLquery = `limit=${limit}`;
   let pageURLquery = `page=${page}`;
@@ -33,7 +22,7 @@ const GetContacts = () => {
 
   const URL = `https://project-contacts-api.vercel.app/api/v1/contacts?${sortURLquery}&${limitURLquery}&${pageURLquery}${selectURLquery}`;
 
-  const fetchContacts = async () => {
+  const fetchContacts = async (values) => {
     const res = await fetch(URL);
     return res.json();
   };
@@ -49,9 +38,23 @@ const GetContacts = () => {
   ReactModal.setAppElement("#root");
 
   return status === "loading" ? (
-    "Loading..."
+    <>
+      <div className="text-center h-100 pt-5">
+        <i className="bi bi-cloud-download" style={{ fontSize: "10rem" }}></i>
+        <p>Fetching your awesome contacts...</p>
+      </div>
+    </>
   ) : status === "error" ? (
-    "Error fetching data"
+    <>
+      <div className="text-center h-100 pt-5">
+        <i
+          className="bi bi-exclamation-circle"
+          style={{ fontSize: "10rem" }}
+        ></i>
+        <h5>Error loading your data...</h5>
+        <p>Please check with the administrator</p>
+      </div>
+    </>
   ) : (
     <>
       {/* ================ Modal ================== */}
@@ -129,23 +132,150 @@ const GetContacts = () => {
         </div>
       </div>
 
+      <Formik
+        initialValues={{
+          limit: "5",
+          sort: "name.firstName",
+          select: FIELDS.map((each) => each[1].join(".")),
+        }}
+        onSubmit={(values) => console.log(values)}
+      >
+        {({ values, handleSubmit, handleChange }) => {
+          return (
+            <>
+              <form className="form-row my-4">
+                <div className="col-md-4 form-group">
+                  <label htmlFor="sort" className="form-label">
+                    Sort by:
+                  </label>
+                  <select
+                    id="sort"
+                    name="sort"
+                    className="form-control"
+                    onChange={handleChange}
+                  >
+                    <option
+                      value={`name.firstName`}
+                    >{`First Name (ascending)`}</option>
+                    <option
+                      value={`-name.firstName`}
+                    >{`First Name (descending)`}</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4 form-group">
+                  <label htmlFor="limit" className="form-label">
+                    Results per page:
+                  </label>
+                  <select
+                    id="limit"
+                    name="limit"
+                    className="form-control"
+                    onChange={handleChange}
+                  >
+                    <option value={limit}>
+                      {limit}
+                      {` (current)`}
+                    </option>
+                    {[5, 10, 25, 50]
+                      .filter((each) => each !== limit)
+                      .map((each, idx) => (
+                        <option key={`limit-option-${idx}`} value={each}>
+                          {each}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div className="col-md-12 form-group">
+                  <label htmlFor="select" className="form-label">
+                    Display fields:
+                  </label>
+                  <div>
+                    <FieldArray
+                      name="select"
+                      render={({ push, remove }) =>
+                        FIELDS.map((each, idx) => (
+                          <FieldCheckBox
+                            key={`display-fields-option-${idx}`}
+                            id={`select[${idx}]`}
+                            name={`select[${idx}]`}
+                            label={each[0]}
+                            value={each[1].join(".")}
+                            defaultChecked
+                            onChange={(e) => {
+                              e.target.checked
+                                ? push(e.target.value)
+                                : remove(e.target.value);
+                              console.log(e.target.checked);
+                            }}
+                          />
+                        ))
+                      }
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="btn btn-success"
+                  onClick={handleSubmit}
+                >
+                  Apply changes
+                </button>
+              </form>
+            </>
+          );
+        }}
+      </Formik>
+
       {/* ================ Table ================== */}
       <div className="table-responsive">
         <table
-          className={`table bg-white table-borderless ${
-            !isFetching && `table-hover`
+          className={`table bg-light table-borderless ${
+            !isFetching ? `table-hover` : `text-light`
           }`}
         >
           <thead>
-            <th className="text-center" colSpan="10">
-              <span className="ml-4">
-                Page {page} / {data.pages}
-              </span>
-            </th>
-          </thead>
-          <thead>
+            <tr className="text-center">
+              <td colSpan="12">
+                <button
+                  type="button"
+                  className="page-item btn btn-light btn-sm mx-3"
+                  onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={!data.pagination.prev}
+                >
+                  <i className="bi bi-caret-left-fill"></i>
+                </button>
+                <strong>
+                  Page {page} / {data.pages}
+                </strong>
+                <button
+                  type="button"
+                  className="page-item btn btn-light btn-sm mx-3"
+                  onClick={() => setPage((prev) => prev + 1)}
+                  disabled={isPreviousData || !data.pagination.next}
+                >
+                  <i className="bi bi-caret-right-fill"></i>
+                </button>
+              </td>
+            </tr>
+            <tr className="text-center border-bottom">
+              <td colSpan="12">
+                {Array.from(Array(data.pages).keys()).map((each, idx) => (
+                  <button
+                    key={`page-btn-${idx}`}
+                    className={`page-item btn mr-2 btn-sm ${
+                      page === each + 1 ? "btn-primary" : "btn-outline-primary"
+                    }`}
+                    onClick={() => setPage(each + 1)}
+                    disabled={page === each + 1}
+                  >
+                    {each + 1}
+                  </button>
+                ))}
+              </td>
+            </tr>
             <tr>
-              {fields.map((each, idx) => (
+              {FIELDS.map((each, idx) => (
                 <th key={`get-table-header-${idx}`} scope="col">
                   {each[0]}
                 </th>
@@ -239,11 +369,11 @@ const GetContacts = () => {
       </div>
 
       {/* ================ Select ================== */}
-      <div className="card mb-4">
+      {/* <div className="card mb-4">
         <div className="card-body">
           <form className="form-group form-row my-4">
             <label className="form-label col-12 h5 mb-4">Select fields:</label>
-            {fields.map((each, idx) => (
+            {FIELDS.map((each, idx) => (
               <FieldCheckBox
                 key={`field-label-${idx}`}
                 label={each[0]}
@@ -277,7 +407,7 @@ const GetContacts = () => {
             Update fields
           </button>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };
@@ -285,7 +415,7 @@ const GetContacts = () => {
 const ContactRow = ({ contact, ...rest }) => {
   return (
     <tr {...rest}>
-      {fields.map((each, idx) => (
+      {FIELDS.map((each, idx) => (
         <td key={`get-table-info-row-${contact._id}-${idx}`}>
           {getNestedObject(contact, each[1])}
         </td>
@@ -294,7 +424,15 @@ const ContactRow = ({ contact, ...rest }) => {
   );
 };
 
-const FieldCheckBox = ({ label, onChange, value, defaultChecked }) => {
+const FieldCheckBox = ({
+  name,
+  id,
+  label,
+  onChange,
+  value,
+  defaultChecked,
+  ...rest
+}) => {
   return (
     <>
       <div
@@ -302,14 +440,16 @@ const FieldCheckBox = ({ label, onChange, value, defaultChecked }) => {
         style={{ zIndex: "0" }}
       >
         <input
+          id={id}
+          name={name}
           type="checkbox"
           className="custom-control-input"
-          id={label.toLowerCase()}
           defaultChecked={defaultChecked}
           value={value}
           onChange={onChange}
+          {...rest}
         />
-        <label className="custom-control-label" htmlFor={label.toLowerCase()}>
+        <label className="custom-control-label" htmlFor={id}>
           {label}
         </label>
       </div>
@@ -317,4 +457,4 @@ const FieldCheckBox = ({ label, onChange, value, defaultChecked }) => {
   );
 };
 
-export default GetContacts;
+export default ContactsTable;

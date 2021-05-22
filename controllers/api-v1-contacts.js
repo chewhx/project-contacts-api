@@ -72,6 +72,9 @@ module.exports.get_ContactById = asyncHandler(async (req, res, next) => {
 // @access    Public
 module.exports.post_Contact = asyncHandler(async (req, res, next) => {
   const contact = await Contact.create(req.body);
+  if (req.body.activateGeocode) {
+    await contact.geocode();
+  }
   res.status(201).json({ success: true, data: contact });
 });
 
@@ -79,25 +82,55 @@ module.exports.post_Contact = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/v1/contacts/:id
 // @access    Public
 module.exports.put_ContactById = asyncHandler(async (req, res, next) => {
-  let contact;
-  // if there is an address update, execute geocoding
-  if (req.body.address) {
-    contact = await Contact.findById(req.params.id);
-    if (!contact) throw Error;
-    contact.address = req.body.address;
+  // let contact;
+  // // if there is an address update, execute geocoding
+  // if (req.body.address) {
+  //   contact = await Contact.findById(req.params.id);
+  //   if (!contact) throw Error;
+  //   contact.address = req.body.address;
+  //   delete req.body.address;
+  //   contact.save();
+  // }
+  // const updatedContact = await Contact.findByIdAndUpdate(
+  //   req.params.id,
+  //   req.body,
+  //   {
+  //     new: true,
+  //     runValidators: true,
+  //   }
+  // );
+  let foundContact = await Contact.findById(req.params.id);
+
+  if (!foundContact) throw Error(`No contact found with id ${req.params.id}`);
+
+  const { addressTouched, address } = req.body;
+  console.log(req.body);
+  console.log(foundContact);
+
+  // If address from req.body and current address are different AND geocoding is activated
+  let updatedContact;
+  if (addressTouched && req.body.activateGeocode) {
+    console.log("address difference");
+    // delete address from req.body
     delete req.body.address;
-    contact.save();
+    // update contact with the rest of req.body
+    await foundContact.updateOne(req.body);
+    // set new address
+    foundContact.address = address;
+    // initiate geocode on new address
+    updatedContact = await foundContact.geocode();
   }
-  const updatedContact = await Contact.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
-  if (!updatedContact) throw Error;
-  res.status(201).json({ success: true, data: updatedContact });
+
+  // If address from req.body and current address is similar
+  if (!addressTouched) {
+    console.log("address same");
+    // update current contact
+    await foundContact.updateOne(req.body);
+    await foundContact.save();
+    // no geocoding
+  }
+
+  res.status(200).json({ success: true, data: foundContact || updatedContact });
 });
 
 // @desc      Delete a contact by id

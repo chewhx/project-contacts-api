@@ -2,13 +2,11 @@ import React from "react";
 import { Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { transitions, positions, Provider as AlertProvider } from "react-alert";
-import GlobalContextProvider from "./context";
 import Navbar from "./components/Navbar";
 import Notification from "./components/Notification";
 import HomeScreen from "./screens/HomeScreen";
-import ContactsScreen from "./screens/ContactsScreen";
-import AddScreen from "./screens/AddScreen";
-import PutContact from "./components/PutContact";
+import PostContact from "./components/PostContact";
+import EditScreen from "./screens/Contacts/EditScreen";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -23,18 +21,16 @@ const App = () => {
       pointerEvents: "true",
     },
   };
+
   return (
-    <GlobalContextProvider>
-      <AlertProvider template={Notification} {...options}>
-        <QueryClientProvider client={queryClient}>
-          <Navbar />
-          <Route exact path={`/addcontacts`} component={AddScreen} />
-          <Route exact path={`/contacts/:id`} component={PutContact} />
-          <Route exact path={`/contacts`} component={ContactsScreen} />
-          <Route exact path={`/`} component={HomeScreen} />
-        </QueryClientProvider>
-      </AlertProvider>
-    </GlobalContextProvider>
+    <AlertProvider template={Notification} {...options}>
+      <QueryClientProvider client={queryClient}>
+        <Navbar />
+        <Route exact path={`/contacts/:id`} component={EditScreen} />
+        <Route exact path={`/add`} component={PostContact} />
+        <Route exact path={`/`} component={HomeScreen} />
+      </QueryClientProvider>
+    </AlertProvider>
   );
 };
 
