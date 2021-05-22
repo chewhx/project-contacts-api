@@ -1,7 +1,7 @@
 {
   "name": "project-contacts-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "mern stack address book data management application",
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
@@ -24,5 +24,9 @@
   "devDependencies": {
     "colors": "^1.4.0",
     "morgan": "^1.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chewhx/project-contacts-api.git"
   }
 }
