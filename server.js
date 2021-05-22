@@ -47,6 +47,8 @@ app.use(cors());
 // Import routes
 const contactRoutes = require("./routes/api-v1-contacts");
 
+app.use(express.static(path.resolve(__dirname, "frontend", "build")));
+
 // Mount routes
 app.use("/api/v1/contacts", contactRoutes);
 app.get("*", (req, res) =>
