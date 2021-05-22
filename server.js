@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const colors = require("colors");
 const morgan = require("morgan");
@@ -48,6 +49,9 @@ const contactRoutes = require("./routes/api-v1-contacts");
 
 // Mount routes
 app.use("/api/v1/contacts", contactRoutes);
+app.get("*", (req, res) =>
+  res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"))
+);
 
 // Error handler
 app.use(errorHandler);
